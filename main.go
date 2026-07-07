@@ -7,16 +7,33 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
+	db "github.com/ka4oks1/FinalGolangProject/pkg"
 )
 
 func main() {
 
-	webDir := "./web"
-
 	err := godotenv.Load()
+
 	if err != nil {
 		log.Fatal("Error while reading .env")
 	}
+
+	dbFilePath := os.Getenv("TODO_DBFILE")
+
+	if dbFilePath != "" {
+		os.Mkdir(dbFilePath, 0755)
+	}
+
+	dbFile := dbFilePath + "scheduler.db"
+
+	err = db.Init(dbFile)
+
+	if err != nil {
+
+		log.Fatal(err)
+	}
+
+	webDir := "./web"
 
 	actualPort := os.Getenv("TODO_LIST_PORT")
 
