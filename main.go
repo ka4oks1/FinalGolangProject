@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-	db "github.com/ka4oks1/FinalGolangProject/pkg"
+	"github.com/ka4oks1/FinalGolangProject/pkg/db"
 )
 
 func main() {

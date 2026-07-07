@@ -15,7 +15,8 @@ id INTEGER PRIMARY KEY AUTOINCREMENT,
 date CHAR(8) NOT NULL DEFAULT "",
 comment TEXT,
 title VARCHAR(64) NOT NULL,
-repeat VARCHAR,
+repeat VARCHAR
+)
 `
 var db *sql.DB
 
@@ -29,8 +30,9 @@ func Init(dbFile string) error {
 	}
 
 	db, err = sql.Open("sqlite", dbFile)
+
 	if err != nil {
-		log.Fatal(err)
+		//log.Fatal(err)
 	}
 
 	if install {
