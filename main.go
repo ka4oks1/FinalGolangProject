@@ -40,6 +40,13 @@ func main() {
 	address := fmt.Sprintf("localhost:%s", actualPort)
 
 	http.Handle("/", http.FileServer(http.Dir(webDir)))
+
+	//nextDate, err := rules.NextDate(time.Now(), "20260812", "d 20")
+	//fmt.Println(nextDate)
+	//
+	//nextDate2, err := rules.NextDate(time.Now(), "20260812", "y")
+	//fmt.Println(nextDate2)
+
 	err = http.ListenAndServe(address, nil)
 
 	if err != nil {
