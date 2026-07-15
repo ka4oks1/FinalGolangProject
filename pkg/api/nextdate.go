@@ -1,8 +1,9 @@
-package rules
+package api
 
 import (
 	"errors"
 	"log"
+	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -30,14 +31,15 @@ func NextDate(now time.Time, dstart string, repeat string) (string, error) {
 			log.Fatal("wrong days count is limited by 400")
 		}
 
-		dstartTime, err := time.Parse("20060102", dstart)
+		resultTime, err := time.Parse("20060102", dstart)
 
 		if err != nil {
 			log.Fatal(err)
+			return "", err
 		}
-		resultTime := time.Time{}
+
 		for {
-			resultTime = dstartTime.AddDate(0, 0, daysCount)
+			resultTime = resultTime.AddDate(0, 0, daysCount)
 			if resultTime.After(now) {
 				break
 			}
@@ -56,15 +58,16 @@ func NextDate(now time.Time, dstart string, repeat string) (string, error) {
 			log.Fatal("wrong arguments every year repeats")
 		}
 
-		dstartTime, err := time.Parse("20060102", dstart)
+		resultTime, err := time.Parse("20060102", dstart)
 
 		if err != nil {
 			log.Fatal(err)
+			return "", err
 		}
-		resultTime := time.Time{}
+
 		for {
 
-			resultTime = dstartTime.AddDate(1, 0, 0)
+			resultTime = resultTime.AddDate(1, 0, 0)
 			if resultTime.After(now) {
 				break
 			}
@@ -85,9 +88,13 @@ func NextDate(now time.Time, dstart string, repeat string) (string, error) {
 		break
 
 	default:
-		log.Println("unavailable rule symbol")
-		break
+		return "", errors.New("invalid rule format")
 	}
 
 	return nextDate, nil
+}
+
+func HandleNextDate(res http.ResponseWriter, req *http.Request) {
+
+	NextDate()
 }

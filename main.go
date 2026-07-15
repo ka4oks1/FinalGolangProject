@@ -5,11 +5,10 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"time"
 
 	"github.com/joho/godotenv"
+	_ "github.com/ka4oks1/FinalGolangProject/pkg/api"
 	"github.com/ka4oks1/FinalGolangProject/pkg/db"
-	"github.com/ka4oks1/FinalGolangProject/pkg/rules"
 )
 
 func main() {
@@ -35,16 +34,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	webDir := "./web"
-
 	actualPort := os.Getenv("TODO_LIST_PORT")
 
 	address := fmt.Sprintf("localhost:%s", actualPort)
 
-	http.Handle("/", http.FileServer(http.Dir(webDir)))
-
-	nextDate, err := rules.NextDate(time.Now(), "20240229", "y")
-	fmt.Println(nextDate)
+	//nextDate, err := api.NextDate(time.Now(), "20260113", "d 7")
+	//fmt.Println(nextDate)
 	//
 	//nextDate2, err := rules.NextDate(time.Now(), "20260812", "y")
 	//fmt.Println(nextDate2)
