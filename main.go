@@ -5,9 +5,11 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/joho/godotenv"
 	"github.com/ka4oks1/FinalGolangProject/pkg/db"
+	"github.com/ka4oks1/FinalGolangProject/pkg/rules"
 )
 
 func main() {
@@ -41,8 +43,8 @@ func main() {
 
 	http.Handle("/", http.FileServer(http.Dir(webDir)))
 
-	//nextDate, err := rules.NextDate(time.Now(), "20260812", "d 20")
-	//fmt.Println(nextDate)
+	nextDate, err := rules.NextDate(time.Now(), "20240229", "y")
+	fmt.Println(nextDate)
 	//
 	//nextDate2, err := rules.NextDate(time.Now(), "20260812", "y")
 	//fmt.Println(nextDate2)
