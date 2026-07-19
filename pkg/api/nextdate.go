@@ -26,17 +26,19 @@ func NextDate(now time.Time, dstart string, repeat string) (string, error) {
 		daysCount, err := strconv.Atoi(strings.TrimSpace(repeat))
 
 		if err != nil {
-			log.Fatal(err)
+			//log.Fatal(err)
+			return "", err
 		}
 
 		if daysCount > 400 {
-			log.Fatal("wrong days count is limited by 400")
+			//log.Fatal("wrong days count is limited by 400")
+			return "", err
 		}
 
 		resultTime, err := time.Parse(dataFormat, dstart)
 
 		if err != nil {
-			log.Fatal(err)
+			//log.Fatal(err)
 			return "", err
 		}
 
@@ -48,7 +50,8 @@ func NextDate(now time.Time, dstart string, repeat string) (string, error) {
 		}
 
 		if !resultTime.After(now) {
-			log.Fatal("incorrect result time")
+			//log.Fatal("incorrect result time")
+			return "", err
 		}
 
 		nextDate = resultTime.Format(dataFormat)
@@ -63,7 +66,7 @@ func NextDate(now time.Time, dstart string, repeat string) (string, error) {
 		resultTime, err := time.Parse(dataFormat, dstart)
 
 		if err != nil {
-			log.Fatal(err)
+			//log.Fatal(err)
 			return "", err
 		}
 
@@ -76,7 +79,8 @@ func NextDate(now time.Time, dstart string, repeat string) (string, error) {
 		}
 
 		if !resultTime.After(now) {
-			log.Fatal("incorrect result time")
+			//log.Fatal("incorrect result time")
+			return "", err
 		}
 
 		nextDate = resultTime.Format(dataFormat)
