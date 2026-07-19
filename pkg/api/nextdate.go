@@ -9,6 +9,8 @@ import (
 	"time"
 )
 
+const dataFormat = "20060102"
+
 // поменять название пакета
 func NextDate(now time.Time, dstart string, repeat string) (string, error) {
 	nextDate := ""
@@ -31,7 +33,7 @@ func NextDate(now time.Time, dstart string, repeat string) (string, error) {
 			log.Fatal("wrong days count is limited by 400")
 		}
 
-		resultTime, err := time.Parse("20060102", dstart)
+		resultTime, err := time.Parse(dataFormat, dstart)
 
 		if err != nil {
 			log.Fatal(err)
@@ -49,7 +51,7 @@ func NextDate(now time.Time, dstart string, repeat string) (string, error) {
 			log.Fatal("incorrect result time")
 		}
 
-		nextDate = resultTime.Format("20060102")
+		nextDate = resultTime.Format(dataFormat)
 		break
 	case 'y':
 		repeat = repeat[1:]
@@ -58,7 +60,7 @@ func NextDate(now time.Time, dstart string, repeat string) (string, error) {
 			log.Fatal("wrong arguments every year repeats")
 		}
 
-		resultTime, err := time.Parse("20060102", dstart)
+		resultTime, err := time.Parse(dataFormat, dstart)
 
 		if err != nil {
 			log.Fatal(err)
@@ -77,7 +79,7 @@ func NextDate(now time.Time, dstart string, repeat string) (string, error) {
 			log.Fatal("incorrect result time")
 		}
 
-		nextDate = resultTime.Format("20060102")
+		nextDate = resultTime.Format(dataFormat)
 
 		break
 	case 'w':
@@ -96,5 +98,19 @@ func NextDate(now time.Time, dstart string, repeat string) (string, error) {
 
 func HandleNextDate(res http.ResponseWriter, req *http.Request) {
 
-	NextDate()
+	nowValue := req.FormValue("now")
+	dateValue := req.FormValue("date")
+	repeatValue := req.FormValue("repeat")
+
+	now, err := time.Parse(dataFormat, nowValue)
+	if err != nil {
+		http.Error(res, err.Error(), http.StatusInternalServerError)
+	}
+	nextDate, err := NextDate(now, dateValue, repeatValue)
+	if err != nil {
+		http.Error(res, err.Error(), http.StatusInternalServerError)
+	}
+	res.Write([]byte(nextDate))
+
+	//"api/nextdate?now=20240126&date=20240126&repeat=y"
 }

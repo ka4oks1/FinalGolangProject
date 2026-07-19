@@ -38,10 +38,12 @@ func main() {
 
 	address := fmt.Sprintf("localhost:%s", actualPort)
 
-	//nextDate, err := api.NextDate(time.Now(), "20260113", "d 7")
+	//nextDate, err := api.NextDate(time.Now(), "20260113", "d 7")go
 	//fmt.Println(nextDate)
-	//
-	//nextDate2, err := rules.NextDate(time.Now(), "20260812", "y")
+	//{"20240101", "y", `20250101`},
+
+	//adfs, err := time.Parse("20060102", "20240101")
+	//nextDate2, err := api.NextDate(adfs, "20250101", "y")
 	//fmt.Println(nextDate2)
 
 	err = http.ListenAndServe(address, nil)
