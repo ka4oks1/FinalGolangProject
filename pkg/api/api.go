@@ -7,6 +7,7 @@ func init() {
 
 	http.Handle("/", http.FileServer(http.Dir(webDir)))
 	http.HandleFunc("/api/nextdate", HandleNextDate)
-	http.HandleFunc("/api/task", HandleTasks)
+	http.HandleFunc("/api/task", postTaskHandler)
+	http.HandleFunc("/api/tasks", getTaskHandler)
 
 }

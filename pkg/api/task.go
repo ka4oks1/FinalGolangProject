@@ -12,18 +12,22 @@ import (
 
 func HandleTasks(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
+	case http.MethodGet:
+		getTaskHandler(w, r)
+		break
 	case http.MethodPost:
 		postTaskHandler(w, r)
 		break
 	case http.MethodDelete:
 		deleteTaskHandler(w, r)
 		break
-	case http.MethodGet:
-		getTaskHandler(w, r)
-		break
+
 	}
 }
 
+type TasksResp struct {
+	Tasks []*db.Task `json:"tasks"`
+}
 type ErrorResponse struct {
 	Error string `json:"error"`
 }
@@ -32,6 +36,18 @@ type IdResponse struct {
 	Id string `json:"id"`
 }
 
+func getTaskHandler(w http.ResponseWriter, r *http.Request) {
+	tasks, err := db.Tasks(10) // в параметре максимальное количество записей
+
+	if err != nil {
+		writeJson(w, ErrorResponse{err.Error()})
+		return
+	}
+
+	writeJson(w, TasksResp{
+		Tasks: tasks,
+	})
+}
 func postTaskHandler(w http.ResponseWriter, r *http.Request) {
 
 	var task db.Task
@@ -40,7 +56,6 @@ func postTaskHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	if err != nil {
-		//http.Error(w, err.Error(), http.StatusInternalServerError)
 		writeJson(w, ErrorResponse{err.Error()})
 		return
 	}
@@ -48,42 +63,26 @@ func postTaskHandler(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(body, &task)
 
 	if err != nil {
-		//http.Error(w, err.Error(), http.StatusInternalServerError)
 		writeJson(w, ErrorResponse{err.Error()})
 		return
 	}
 
 	if task.Title == "" {
-		//http.Error(w, "task title is empty", http.StatusInternalServerError)
 		writeJson(w, ErrorResponse{"task title is empty"})
 		return
 	}
 
-	//if task.Repeat != "" {
-
-	//		parsedTime, err := time.Parse(dateFormat, task.Date)
-
-	//if err != nil {
-	//	writeJson(w, ErrorResponse{err.Error()})
-	//	return
-	//}
-
-	//	if !afterNow(parsedTime, time.Now()) {
 	_, err = NextDate(time.Now(), task.Date, task.Repeat)
-	//}
 
 	if err != nil {
 		writeJson(w, ErrorResponse{err.Error()})
 		return
 	}
 
-	//}
-
 	var id int64
 	err = checkDate(&task)
 
 	if err != nil {
-		//http.Error(w, err.Error(), http.StatusInternalServerError)
 		writeJson(w, ErrorResponse{err.Error()})
 		return
 	}
@@ -91,10 +90,8 @@ func postTaskHandler(w http.ResponseWriter, r *http.Request) {
 	id, err = db.AddTask(&task)
 
 	if err != nil {
-		//http.Error(w, err.Error(), http.StatusInternalServerError)
 		writeJson(w, ErrorResponse{err.Error()})
 		return
-
 	}
 
 	idStr := strconv.Itoa(int(id))
@@ -102,10 +99,6 @@ func postTaskHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 func deleteTaskHandler(w http.ResponseWriter, r *http.Request) {
-
-}
-
-func getTaskHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 

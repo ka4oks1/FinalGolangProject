@@ -1,6 +1,8 @@
 package db
 
-import "database/sql"
+import (
+	"database/sql"
+)
 
 type Task struct {
 	ID      string `json:"id"`
@@ -9,12 +11,6 @@ type Task struct {
 	Title   string `json:"title"`
 	Repeat  string `json:"repeat"`
 }
-
-//id INTEGER PRIMARY KEY AUTOINCREMENT,
-//date CHAR(8) NOT NULL DEFAULT "",
-//comment TEXT,
-//title VARCHAR(64) NOT NULL,
-//repeat VARCHAR
 
 func AddTask(task *Task) (int64, error) {
 	var id int64
@@ -36,4 +32,35 @@ func AddTask(task *Task) (int64, error) {
 	}
 
 	return id, err
+}
+
+func Tasks(limit int) ([]*Task, error) {
+
+	var tasks []*Task
+
+	rows, err := db.Query("SELECT * FROM scheduler ORDER BY date LIMIT :limit;", sql.Named("limit", limit))
+
+	if err != nil {
+		return []*Task{}, err
+	}
+	var foundOne bool
+
+	for rows.Next() {
+		foundOne = true
+
+		var currTask Task
+
+		err := rows.Scan(&currTask.ID, &currTask.Date, &currTask.Comment, &currTask.Title, &currTask.Repeat)
+
+		if err != nil {
+			return []*Task{}, err
+		}
+
+		tasks = append(tasks, &currTask)
+	}
+	if !foundOne {
+		return []*Task{}, err
+	}
+
+	return tasks, err
 }
