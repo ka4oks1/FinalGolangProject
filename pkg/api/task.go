@@ -59,13 +59,25 @@ func postTaskHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//if task.Repeat != "" {
+
+	//		parsedTime, err := time.Parse(dateFormat, task.Date)
+
+	//if err != nil {
+	//	writeJson(w, ErrorResponse{err.Error()})
+	//	return
+	//}
+
+	//	if !afterNow(parsedTime, time.Now()) {
 	_, err = NextDate(time.Now(), task.Date, task.Repeat)
+	//}
 
 	if err != nil {
-		//http.Error(w, err.Error(), http.StatusInternalServerError)
 		writeJson(w, ErrorResponse{err.Error()})
 		return
 	}
+
+	//}
 
 	var id int64
 	err = checkDate(&task)
@@ -87,11 +99,6 @@ func postTaskHandler(w http.ResponseWriter, r *http.Request) {
 
 	idStr := strconv.Itoa(int(id))
 	writeJson(w, IdResponse{idStr})
-
-	//if err != nil {
-	//	//http.Error(w, err.Error(), http.StatusInternalServerError)
-	//	writeJson(w, ErrorResponse{err.Error()})
-	//}
 
 }
 func deleteTaskHandler(w http.ResponseWriter, r *http.Request) {
@@ -116,19 +123,17 @@ func checkDate(task *db.Task) error {
 	var next string
 
 	next, err = NextDate(now, task.Date, task.Repeat)
-
 	if err != nil {
 		return err
 	}
 
-	// если сегодня (now) больше task.Date (t)
 	if afterNow(now, t) {
 		if len(task.Repeat) == 0 {
-			// если правила повторения нет, то берём сегодняшнее число
 			task.Date = now.Format("20060102")
 		} else {
-			// в противном случае, берём вычисленную ранее следующую дату
-			task.Date = next
+			if !(now.Format(dateFormat) == t.Format(dateFormat)) {
+				task.Date = next
+			}
 		}
 	}
 
