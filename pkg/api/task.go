@@ -10,21 +10,6 @@ import (
 	"github.com/ka4oks1/FinalGolangProject/pkg/db"
 )
 
-func HandleTasks(w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
-	case http.MethodGet:
-		getTaskHandler(w, r)
-		break
-	case http.MethodPost:
-		postTaskHandler(w, r)
-		break
-	case http.MethodDelete:
-		deleteTaskHandler(w, r)
-		break
-
-	}
-}
-
 type TasksResp struct {
 	Tasks []*db.Task `json:"tasks"`
 }
@@ -36,7 +21,21 @@ type IdResponse struct {
 	Id string `json:"id"`
 }
 
-func getTaskHandler(w http.ResponseWriter, r *http.Request) {
+func mainTaskHandler(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodPost:
+		postTaskHandler(w, r)
+		break
+	case http.MethodGet:
+		getOneTaskHandler(w, r)
+		break
+	case http.MethodPut:
+		putTaskHandler(w, r)
+		break
+	}
+}
+
+func getTasksHandler(w http.ResponseWriter, r *http.Request) {
 	tasks, err := db.Tasks(10) // в параметре максимальное количество записей
 
 	if err != nil {
@@ -47,6 +46,20 @@ func getTaskHandler(w http.ResponseWriter, r *http.Request) {
 	writeJson(w, TasksResp{
 		Tasks: tasks,
 	})
+}
+
+func getOneTaskHandler(w http.ResponseWriter, r *http.Request) {
+	idValue := r.FormValue("id")
+
+	currTask, err := db.GetTask(idValue)
+
+	if err != nil {
+		writeJson(w, ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	writeJson(w, &currTask)
+
 }
 func postTaskHandler(w http.ResponseWriter, r *http.Request) {
 
@@ -98,7 +111,56 @@ func postTaskHandler(w http.ResponseWriter, r *http.Request) {
 	writeJson(w, IdResponse{idStr})
 
 }
-func deleteTaskHandler(w http.ResponseWriter, r *http.Request) {
+
+func putTaskHandler(w http.ResponseWriter, r *http.Request) {
+
+	var task db.Task
+	body, err := io.ReadAll(r.Body)
+
+	defer r.Body.Close()
+
+	if err != nil {
+		writeJson(w, ErrorResponse{err.Error()})
+		return
+	}
+
+	err = json.Unmarshal(body, &task)
+
+	if err != nil {
+		writeJson(w, ErrorResponse{err.Error()})
+		return
+	}
+
+	if task.Title == "" {
+		writeJson(w, ErrorResponse{"task title is empty"})
+		return
+	}
+
+	_, err = NextDate(time.Now(), task.Date, task.Repeat)
+
+	if err != nil {
+		writeJson(w, ErrorResponse{err.Error()})
+		return
+	}
+
+	err = checkDate(&task)
+
+	if err != nil {
+		writeJson(w, ErrorResponse{err.Error()})
+		return
+	}
+
+	err = db.UpdateTask(&task)
+
+	if err != nil {
+		writeJson(w, ErrorResponse{err.Error()})
+		return
+	}
+
+	type emptyStruct struct {
+	}
+
+	writeJson(w, emptyStruct{})
 
 }
 
