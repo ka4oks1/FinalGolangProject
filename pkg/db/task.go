@@ -19,14 +19,21 @@ type Task struct {
 func AddTask(task *Task) (int64, error) {
 	var id int64
 	// определите запрос
-	query := `INSERT INTO scheduler (date,comment,title,repeat) VALUES (:date,:comment,:title,:repeat,)`
+	query := `INSERT INTO scheduler (date,comment,title,repeat) VALUES (:date,:comment,:title,:repeat)`
 	res, err := db.Exec(query, sql.Named("date", task.Date),
 		sql.Named("comment", task.Comment),
 		sql.Named("title", task.Title),
-		sql.Named("repeat", task.Repeat) /*передайте параметры task.Date, task.Title и т.д.*/)
+		sql.Named("repeat", task.Repeat))
 
-	if err == nil {
-		id, err = res.LastInsertId()
+	if err != nil {
+		return 0, err
 	}
+
+	id, err = res.LastInsertId()
+
+	if err != nil {
+		return 0, err
+	}
+
 	return id, err
 }

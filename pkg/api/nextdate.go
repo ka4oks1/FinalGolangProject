@@ -11,12 +11,16 @@ import (
 
 const dataFormat = "20060102"
 
-// поменять название пакета
+func afterNow(date, now time.Time) bool {
+
+	return date.After(now)
+}
+
 func NextDate(now time.Time, dstart string, repeat string) (string, error) {
 	nextDate := ""
 
 	if repeat == "" {
-		return "", errors.New("empty repeat rule")
+		return "", nil
 	}
 	switch repeat[0] {
 
@@ -44,12 +48,12 @@ func NextDate(now time.Time, dstart string, repeat string) (string, error) {
 
 		for {
 			resultTime = resultTime.AddDate(0, 0, daysCount)
-			if resultTime.After(now) {
+			if afterNow(resultTime, now) {
 				break
 			}
 		}
 
-		if !resultTime.After(now) {
+		if !afterNow(resultTime, now) {
 			//log.Fatal("incorrect result time")
 			return "", err
 		}
@@ -73,12 +77,12 @@ func NextDate(now time.Time, dstart string, repeat string) (string, error) {
 		for {
 
 			resultTime = resultTime.AddDate(1, 0, 0)
-			if resultTime.After(now) {
+			if afterNow(resultTime, now) {
 				break
 			}
 		}
 
-		if !resultTime.After(now) {
+		if !afterNow(resultTime, now) {
 			//log.Fatal("incorrect result time")
 			return "", err
 		}
@@ -87,12 +91,9 @@ func NextDate(now time.Time, dstart string, repeat string) (string, error) {
 
 		break
 	case 'w':
-
-		break
+		return "", errors.New("invalid rule format")
 	case 'm':
-
-		break
-
+		return "", errors.New("invalid rule format")
 	default:
 		return "", errors.New("invalid rule format")
 	}
