@@ -2,7 +2,9 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
+	"math"
 	"net/http"
 	"strconv"
 	"time"
@@ -139,6 +141,18 @@ func putTaskHandler(w http.ResponseWriter, r *http.Request) {
 
 	if task.Title == "" {
 		writeJson(w, ErrorResponse{"task title is empty"})
+		return
+	}
+
+	idInt, err := strconv.Atoi(task.ID)
+
+	if err != nil {
+		writeJson(w, ErrorResponse{err.Error()})
+		return
+	}
+
+	if idInt >= math.MaxInt32 {
+		writeJson(w, ErrorResponse{errors.New("incorrect id").Error()})
 		return
 	}
 
