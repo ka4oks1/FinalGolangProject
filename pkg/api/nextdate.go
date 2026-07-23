@@ -23,6 +23,10 @@ func NextDate(now time.Time, dstart string, repeat string) (string, error) {
 		return "", nil
 	}
 
+	if dstart == "" {
+		dstart = time.Now().Format(dateFormat)
+	}
+
 	switch repeat[0] {
 
 	case 'd':

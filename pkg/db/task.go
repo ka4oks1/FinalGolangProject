@@ -2,7 +2,7 @@ package db
 
 import (
 	"database/sql"
-	"fmt"
+	"errors"
 )
 
 type Task struct {
@@ -15,7 +15,7 @@ type Task struct {
 
 func AddTask(task *Task) (int64, error) {
 	var id int64
-	// определите запрос
+
 	query := `INSERT INTO scheduler (date,comment,title,repeat) VALUES (:date,:comment,:title,:repeat)`
 	res, err := db.Exec(query, sql.Named("date", task.Date),
 		sql.Named("comment", task.Comment),
@@ -41,7 +41,7 @@ func Tasks(limit int) ([]*Task, error) {
 
 	rows, err := db.Query("SELECT * FROM scheduler ORDER BY date LIMIT :limit;", sql.Named("limit", limit))
 
-	defer rows.Close()
+	//defer rows.Close()
 
 	if err != nil {
 		return []*Task{}, err
@@ -101,7 +101,41 @@ func UpdateTask(task *Task) error {
 		return err
 	}
 	if count == 0 {
-		return fmt.Errorf(`incorrect id for updating task`)
+		errors.New(`incorrect id for updating task`)
 	}
+	return nil
+}
+
+func DeleteTask(id string) error {
+
+	query := `DELETE FROM scheduler WHERE id = :id;`
+
+	_, err := db.Exec(query, sql.Named("id", id))
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func UpdateDate(next string, id string) error {
+
+	query := `UPDATE scheduler SET date = :date WHERE id = :id;`
+
+	_, err := db.Exec(query, sql.Named("date", next), sql.Named("id", id))
+
+	if err != nil {
+		return err
+	}
+
+	//	count, err := res.RowsAffected()
+
+	//	if err != nil {
+	//		return err
+	//}
+	//if count == 0 {
+	//	return errors.New(`incorrect id for updating task`)
+	//}
 	return nil
 }

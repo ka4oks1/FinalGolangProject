@@ -44,7 +44,5 @@ func Init(dbFile string) error {
 	}
 
 	return err
-	// если install равен true, после открытия БД требуется выполнить
-	// sql-запрос с CREATE TABLE и CREATE INDEX
 
 }

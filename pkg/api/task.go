@@ -21,6 +21,9 @@ type IdResponse struct {
 	Id string `json:"id"`
 }
 
+type EmptyStruct struct {
+}
+
 func mainTaskHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
@@ -32,11 +35,14 @@ func mainTaskHandler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPut:
 		putTaskHandler(w, r)
 		break
+	case http.MethodDelete:
+		deleteTaskHandler(w, r)
+		break
 	}
 }
 
 func getTasksHandler(w http.ResponseWriter, r *http.Request) {
-	tasks, err := db.Tasks(10) // в параметре максимальное количество записей
+	tasks, err := db.Tasks(50)
 
 	if err != nil {
 		writeJson(w, ErrorResponse{err.Error()})
@@ -157,14 +163,12 @@ func putTaskHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	type emptyStruct struct {
-	}
-
-	writeJson(w, emptyStruct{})
+	writeJson(w, EmptyStruct{})
 
 }
 
 func checkDate(task *db.Task) error {
+
 	now := time.Now()
 	if task.Date == "" {
 		task.Date = now.Format("20060102")
@@ -210,5 +214,73 @@ func writeJson(w http.ResponseWriter, data any) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
+
+}
+
+func deleteTaskHandler(w http.ResponseWriter, r *http.Request) {
+
+	idValue := r.FormValue("id")
+
+	task, err := db.GetTask(idValue)
+
+	if err != nil {
+		writeJson(w, ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	err = db.DeleteTask(task.ID)
+	if err != nil {
+		writeJson(w, ErrorResponse{Error: err.Error()})
+		return
+	}
+	writeJson(w, EmptyStruct{})
+
+}
+
+func DoneTaskHandler(w http.ResponseWriter, r *http.Request) {
+
+	idValue := r.FormValue("id")
+
+	task, err := db.GetTask(idValue)
+
+	if err != nil {
+		writeJson(w, ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	if task.Repeat == "" {
+
+		err = db.DeleteTask(task.ID)
+
+		if err != nil {
+			writeJson(w, ErrorResponse{Error: err.Error()})
+			return
+		}
+
+		writeJson(w, EmptyStruct{})
+		return
+	}
+	//currTime, err := time.Parse(dateFormat, time.Now())
+
+	//if err != nil {
+	//	writeJson(w, ErrorResponse{Error: err.Error()})
+	//	return
+	//}
+
+	nextDate, err := NextDate(time.Now(), task.Date, task.Repeat)
+
+	if err != nil {
+		writeJson(w, ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	err = db.UpdateDate(nextDate, task.ID)
+
+	if err != nil {
+		writeJson(w, ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	writeJson(w, EmptyStruct{})
 
 }
