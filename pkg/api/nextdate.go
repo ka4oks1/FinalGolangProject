@@ -72,7 +72,6 @@ func NextDate(now time.Time, dstart string, repeat string) (string, error) {
 		resultTime, err := time.Parse(dateFormat, dstart)
 
 		if err != nil {
-			//log.Fatal(err)
 			return "", err
 		}
 
@@ -85,7 +84,6 @@ func NextDate(now time.Time, dstart string, repeat string) (string, error) {
 		}
 
 		if !afterNow(resultTime, now) {
-			//log.Fatal("incorrect result time")
 			return "", err
 		}
 
@@ -119,5 +117,4 @@ func HandleNextDate(res http.ResponseWriter, req *http.Request) {
 	}
 	res.Write([]byte(nextDate))
 
-	//"api/nextdate?now=20240126&date=20240126&repeat=y"
 }

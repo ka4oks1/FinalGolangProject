@@ -274,12 +274,6 @@ func DoneTaskHandler(w http.ResponseWriter, r *http.Request) {
 		writeJson(w, EmptyStruct{})
 		return
 	}
-	//currTime, err := time.Parse(dateFormat, time.Now())
-
-	//if err != nil {
-	//	writeJson(w, ErrorResponse{Error: err.Error()})
-	//	return
-	//}
 
 	nextDate, err := NextDate(time.Now(), task.Date, task.Repeat)
 

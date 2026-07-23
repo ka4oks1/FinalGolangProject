@@ -41,8 +41,6 @@ func Tasks(limit int) ([]*Task, error) {
 
 	rows, err := db.Query("SELECT * FROM scheduler ORDER BY date LIMIT :limit;", sql.Named("limit", limit))
 
-	//defer rows.Close()
-
 	if err != nil {
 		return []*Task{}, err
 	}
@@ -83,7 +81,7 @@ func GetTask(id string) (*Task, error) {
 }
 
 func UpdateTask(task *Task) error {
-	// параметры пропущены, не забудьте указать WHERE
+
 	query := `UPDATE scheduler SET date = :date,comment = :comment,title = :title,repeat = :repeat WHERE id = :id;`
 
 	res, err := db.Exec(query, sql.Named("date", task.Date),
@@ -129,13 +127,5 @@ func UpdateDate(next string, id string) error {
 		return err
 	}
 
-	//	count, err := res.RowsAffected()
-
-	//	if err != nil {
-	//		return err
-	//}
-	//if count == 0 {
-	//	return errors.New(`incorrect id for updating task`)
-	//}
 	return nil
 }
