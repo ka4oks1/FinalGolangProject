@@ -16,7 +16,7 @@ func main() {
 	err := godotenv.Load()
 
 	if err != nil {
-		log.Fatal("Error while reading .env")
+		log.Println("Error while reading .env")
 	}
 
 	dbFilePath := os.Getenv("TODO_DBFILE")
@@ -26,12 +26,12 @@ func main() {
 	}
 
 	dbFile := dbFilePath + "scheduler.db"
-
 	err = db.Init(dbFile)
 
 	if err != nil {
-
+		db.CloseDB()
 		log.Fatal(err)
+
 	}
 
 	actualPort := os.Getenv("TODO_LIST_PORT")
@@ -41,6 +41,7 @@ func main() {
 	err = http.ListenAndServe(address, nil)
 
 	if err != nil {
+		db.CloseDB()
 		log.Fatal(err)
 	}
 }

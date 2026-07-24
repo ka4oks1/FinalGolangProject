@@ -102,19 +102,23 @@ func NextDate(now time.Time, dstart string, repeat string) (string, error) {
 }
 
 func HandleNextDate(res http.ResponseWriter, req *http.Request) {
+	if req.Method == http.MethodGet {
 
-	nowValue := req.FormValue("now")
-	dateValue := req.FormValue("date")
-	repeatValue := req.FormValue("repeat")
+		nowValue := req.FormValue("now")
+		dateValue := req.FormValue("date")
+		repeatValue := req.FormValue("repeat")
 
-	now, err := time.Parse(dateFormat, nowValue)
-	if err != nil {
-		http.Error(res, err.Error(), http.StatusInternalServerError)
+		now, err := time.Parse(dateFormat, nowValue)
+		if err != nil {
+			http.Error(res, err.Error(), http.StatusInternalServerError)
+		}
+		nextDate, err := NextDate(now, dateValue, repeatValue)
+		if err != nil {
+			http.Error(res, err.Error(), http.StatusInternalServerError)
+		}
+		res.Write([]byte(nextDate))
+		
+		return
 	}
-	nextDate, err := NextDate(now, dateValue, repeatValue)
-	if err != nil {
-		http.Error(res, err.Error(), http.StatusInternalServerError)
-	}
-	res.Write([]byte(nextDate))
 
 }

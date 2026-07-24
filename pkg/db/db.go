@@ -32,7 +32,8 @@ func Init(dbFile string) error {
 	db, err = sql.Open("sqlite", dbFile)
 
 	if err != nil {
-		log.Fatal(err)
+		CloseDB()
+		return err
 	}
 
 	if install {
@@ -40,9 +41,18 @@ func Init(dbFile string) error {
 	}
 
 	if err != nil {
-		log.Fatal(err)
+		CloseDB()
+		return err
 	}
 
 	return err
 
+}
+
+func CloseDB() {
+
+	err := db.Close()
+	if err != nil {
+		log.Println(err)
+	}
 }

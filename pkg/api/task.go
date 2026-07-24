@@ -2,9 +2,7 @@ package api
 
 import (
 	"encoding/json"
-	"errors"
 	"io"
-	"math"
 	"net/http"
 	"strconv"
 	"time"
@@ -30,21 +28,27 @@ func mainTaskHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
 		postTaskHandler(w, r)
-		break
+		return
 	case http.MethodGet:
 		getOneTaskHandler(w, r)
-		break
+		return
 	case http.MethodPut:
 		putTaskHandler(w, r)
-		break
+		return
 	case http.MethodDelete:
 		deleteTaskHandler(w, r)
-		break
+		return
+	default:
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
 	}
+
 }
 
+const tasksLimit int = 50
+
 func getTasksHandler(w http.ResponseWriter, r *http.Request) {
-	tasks, err := db.Tasks(50)
+	tasks, err := db.Tasks(tasksLimit)
 
 	if err != nil {
 		writeJson(w, ErrorResponse{err.Error()})
@@ -73,8 +77,6 @@ func postTaskHandler(w http.ResponseWriter, r *http.Request) {
 
 	var task db.Task
 	body, err := io.ReadAll(r.Body)
-
-	defer r.Body.Close()
 
 	if err != nil {
 		writeJson(w, ErrorResponse{err.Error()})
@@ -125,8 +127,6 @@ func putTaskHandler(w http.ResponseWriter, r *http.Request) {
 	var task db.Task
 	body, err := io.ReadAll(r.Body)
 
-	defer r.Body.Close()
-
 	if err != nil {
 		writeJson(w, ErrorResponse{err.Error()})
 		return
@@ -144,15 +144,10 @@ func putTaskHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	idInt, err := strconv.Atoi(task.ID)
+	_, err = strconv.Atoi(task.ID)
 
 	if err != nil {
 		writeJson(w, ErrorResponse{err.Error()})
-		return
-	}
-
-	if idInt >= math.MaxInt32 {
-		writeJson(w, ErrorResponse{errors.New("incorrect id").Error()})
 		return
 	}
 
@@ -185,10 +180,10 @@ func checkDate(task *db.Task) error {
 
 	now := time.Now()
 	if task.Date == "" {
-		task.Date = now.Format("20060102")
+		task.Date = now.Format(dateFormat)
 	}
 
-	t, err := time.Parse("20060102", task.Date)
+	t, err := time.Parse(dateFormat, task.Date)
 
 	if err != nil {
 		return err
@@ -202,7 +197,7 @@ func checkDate(task *db.Task) error {
 
 	if afterNow(now, t) {
 		if len(task.Repeat) == 0 {
-			task.Date = now.Format("20060102")
+			task.Date = now.Format(dateFormat)
 		} else {
 			if !(now.Format(dateFormat) == t.Format(dateFormat)) {
 				task.Date = next
@@ -292,3 +287,5 @@ func DoneTaskHandler(w http.ResponseWriter, r *http.Request) {
 	writeJson(w, EmptyStruct{})
 
 }
+
+func wrongMethod() {}

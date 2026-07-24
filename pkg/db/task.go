@@ -47,6 +47,11 @@ func Tasks(limit int) ([]*Task, error) {
 	var foundOne bool
 
 	for rows.Next() {
+
+		if err = rows.Err(); err != nil {
+			return []*Task{}, err
+		}
+
 		foundOne = true
 
 		var currTask Task
