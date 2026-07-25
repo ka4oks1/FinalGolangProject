@@ -28,10 +28,10 @@ func main() {
 	dbFile := dbFilePath + "scheduler.db"
 	err = db.Init(dbFile)
 
-	if err != nil {
-		db.CloseDB()
-		log.Fatal(err)
+	defer db.CloseDB()
 
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	actualPort := os.Getenv("TODO_LIST_PORT")
@@ -41,7 +41,6 @@ func main() {
 	err = http.ListenAndServe(address, nil)
 
 	if err != nil {
-		db.CloseDB()
 		log.Fatal(err)
 	}
 }

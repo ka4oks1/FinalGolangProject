@@ -51,13 +51,13 @@ func getTasksHandler(w http.ResponseWriter, r *http.Request) {
 	tasks, err := db.Tasks(tasksLimit)
 
 	if err != nil {
-		writeJson(w, ErrorResponse{err.Error()})
+		writeJson(w, ErrorResponse{err.Error()}, http.StatusInternalServerError)
 		return
 	}
 
 	writeJson(w, TasksResp{
 		Tasks: tasks,
-	})
+	}, http.StatusOK)
 }
 
 func getOneTaskHandler(w http.ResponseWriter, r *http.Request) {
@@ -66,11 +66,11 @@ func getOneTaskHandler(w http.ResponseWriter, r *http.Request) {
 	currTask, err := db.GetTask(idValue)
 
 	if err != nil {
-		writeJson(w, ErrorResponse{Error: err.Error()})
+		writeJson(w, ErrorResponse{Error: err.Error()}, http.StatusInternalServerError)
 		return
 	}
 
-	writeJson(w, &currTask)
+	writeJson(w, &currTask, http.StatusOK)
 
 }
 func postTaskHandler(w http.ResponseWriter, r *http.Request) {
@@ -79,26 +79,26 @@ func postTaskHandler(w http.ResponseWriter, r *http.Request) {
 	body, err := io.ReadAll(r.Body)
 
 	if err != nil {
-		writeJson(w, ErrorResponse{err.Error()})
+		writeJson(w, ErrorResponse{err.Error()}, http.StatusInternalServerError)
 		return
 	}
 
 	err = json.Unmarshal(body, &task)
 
 	if err != nil {
-		writeJson(w, ErrorResponse{err.Error()})
+		writeJson(w, ErrorResponse{err.Error()}, http.StatusInternalServerError)
 		return
 	}
 
 	if task.Title == "" {
-		writeJson(w, ErrorResponse{"task title is empty"})
+		writeJson(w, ErrorResponse{"task title is empty"}, http.StatusNotImplemented)
 		return
 	}
 
 	_, err = NextDate(time.Now(), task.Date, task.Repeat)
 
 	if err != nil {
-		writeJson(w, ErrorResponse{err.Error()})
+		writeJson(w, ErrorResponse{err.Error()}, http.StatusInternalServerError)
 		return
 	}
 
@@ -106,19 +106,19 @@ func postTaskHandler(w http.ResponseWriter, r *http.Request) {
 	err = checkDate(&task)
 
 	if err != nil {
-		writeJson(w, ErrorResponse{err.Error()})
+		writeJson(w, ErrorResponse{err.Error()}, http.StatusInternalServerError)
 		return
 	}
 
 	id, err = db.AddTask(&task)
 
 	if err != nil {
-		writeJson(w, ErrorResponse{err.Error()})
+		writeJson(w, ErrorResponse{err.Error()}, http.StatusInternalServerError)
 		return
 	}
 
 	idStr := strconv.Itoa(int(id))
-	writeJson(w, IdResponse{idStr})
+	writeJson(w, IdResponse{idStr}, http.StatusOK)
 
 }
 
@@ -128,51 +128,51 @@ func putTaskHandler(w http.ResponseWriter, r *http.Request) {
 	body, err := io.ReadAll(r.Body)
 
 	if err != nil {
-		writeJson(w, ErrorResponse{err.Error()})
+		writeJson(w, ErrorResponse{err.Error()}, http.StatusInternalServerError)
 		return
 	}
 
 	err = json.Unmarshal(body, &task)
 
 	if err != nil {
-		writeJson(w, ErrorResponse{err.Error()})
+		writeJson(w, ErrorResponse{err.Error()}, http.StatusInternalServerError)
 		return
 	}
 
 	if task.Title == "" {
-		writeJson(w, ErrorResponse{"task title is empty"})
+		writeJson(w, ErrorResponse{"task title is empty"}, http.StatusNotImplemented)
 		return
 	}
 
-	_, err = strconv.Atoi(task.ID)
+	_, err = strconv.ParseInt(task.ID, 10, 32)
 
 	if err != nil {
-		writeJson(w, ErrorResponse{err.Error()})
+		writeJson(w, ErrorResponse{err.Error()}, http.StatusInternalServerError)
 		return
 	}
 
 	_, err = NextDate(time.Now(), task.Date, task.Repeat)
 
 	if err != nil {
-		writeJson(w, ErrorResponse{err.Error()})
+		writeJson(w, ErrorResponse{err.Error()}, http.StatusInternalServerError)
 		return
 	}
 
 	err = checkDate(&task)
 
 	if err != nil {
-		writeJson(w, ErrorResponse{err.Error()})
+		writeJson(w, ErrorResponse{err.Error()}, http.StatusInternalServerError)
 		return
 	}
 
 	err = db.UpdateTask(&task)
 
 	if err != nil {
-		writeJson(w, ErrorResponse{err.Error()})
+		writeJson(w, ErrorResponse{err.Error()}, http.StatusInternalServerError)
 		return
 	}
 
-	writeJson(w, EmptyStruct{})
+	writeJson(w, EmptyStruct{}, http.StatusOK)
 
 }
 
@@ -208,9 +208,11 @@ func checkDate(task *db.Task) error {
 	return err
 }
 
-func writeJson(w http.ResponseWriter, data any) {
+func writeJson(w http.ResponseWriter, data any, statusCode int) {
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+
+	w.WriteHeader(statusCode)
 
 	jsData, err := json.Marshal(data)
 
@@ -233,16 +235,16 @@ func deleteTaskHandler(w http.ResponseWriter, r *http.Request) {
 	task, err := db.GetTask(idValue)
 
 	if err != nil {
-		writeJson(w, ErrorResponse{Error: err.Error()})
+		writeJson(w, ErrorResponse{Error: err.Error()}, http.StatusInternalServerError)
 		return
 	}
 
 	err = db.DeleteTask(task.ID)
 	if err != nil {
-		writeJson(w, ErrorResponse{Error: err.Error()})
+		writeJson(w, ErrorResponse{Error: err.Error()}, http.StatusInternalServerError)
 		return
 	}
-	writeJson(w, EmptyStruct{})
+	writeJson(w, EmptyStruct{}, http.StatusOK)
 
 }
 
@@ -253,7 +255,7 @@ func DoneTaskHandler(w http.ResponseWriter, r *http.Request) {
 	task, err := db.GetTask(idValue)
 
 	if err != nil {
-		writeJson(w, ErrorResponse{Error: err.Error()})
+		writeJson(w, ErrorResponse{Error: err.Error()}, http.StatusInternalServerError)
 		return
 	}
 
@@ -262,30 +264,28 @@ func DoneTaskHandler(w http.ResponseWriter, r *http.Request) {
 		err = db.DeleteTask(task.ID)
 
 		if err != nil {
-			writeJson(w, ErrorResponse{Error: err.Error()})
+			writeJson(w, ErrorResponse{Error: err.Error()}, http.StatusInternalServerError)
 			return
 		}
 
-		writeJson(w, EmptyStruct{})
+		writeJson(w, EmptyStruct{}, http.StatusOK)
 		return
 	}
 
 	nextDate, err := NextDate(time.Now(), task.Date, task.Repeat)
 
 	if err != nil {
-		writeJson(w, ErrorResponse{Error: err.Error()})
+		writeJson(w, ErrorResponse{Error: err.Error()}, http.StatusInternalServerError)
 		return
 	}
 
 	err = db.UpdateDate(nextDate, task.ID)
 
 	if err != nil {
-		writeJson(w, ErrorResponse{Error: err.Error()})
+		writeJson(w, ErrorResponse{Error: err.Error()}, http.StatusInternalServerError)
 		return
 	}
 
-	writeJson(w, EmptyStruct{})
+	writeJson(w, EmptyStruct{}, http.StatusOK)
 
 }
-
-func wrongMethod() {}
