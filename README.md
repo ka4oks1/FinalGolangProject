@@ -12,7 +12,7 @@
   Сортировка задач по дате добавления.
 
 ## ⚡️ Быстрый старт
-Клонируйте репозиторий: `git clone https://github.com/ka4oks1/FinalGolangProject.git`
+Клонируйте репозиторий: `git clone https://github.com/ka4oks1/ToDoList.git`
 
 Запуск производится командой `go run main.go`
 
